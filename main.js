@@ -30,7 +30,7 @@ function muFunds(option, id, source) {
         option == "currency" || 
         option == "expenses" || 
         option == "category" || 
-        option == "assets" ||
+        option == "aum" ||
         option == "source")) {
     throw new Error( "You have selected an invalid option." );
     return;

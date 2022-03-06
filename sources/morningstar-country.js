@@ -185,7 +185,7 @@ function getExpensesFromMorningstarCountry(doc, country) {
     return list[7].replace(',', '.');
 }
 
-function getTotalAssetsFromMorningstarCountry(doc, country) {
+function getAUMFromMorningstarCountry(doc, country) {
   const list= doc('.overviewKeyStatsTable .text').map(function() { return doc(this).text();}).get();
   if(country == "de")
     return list[list.length-4].replace(',', '.');
@@ -231,6 +231,10 @@ function loadFromMorningstarCountry(option, id, country) {
 
   if(option == "category")
     return processCategory(getCategoryFromMorningstarCountry(doc, country));
+
+  if(option == 'aum')
+    return processAUM(getAUMFromMorningstarCountry(doc, country));
+
   if(option == "source")
     return processSource("morningstar-" + country);
 }

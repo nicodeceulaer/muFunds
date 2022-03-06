@@ -14,6 +14,25 @@ function processNav(nav) {
     throw new Error("NAV is not available for this asset and source. Please try another data source");
 }
 
+// returns AUM in milion
+function processAUM(aum) {
+  Logger.log('processAUM: ' + aum);
+  aum = aum.replace(',', '.').replace('EUR','').replace('USD','');
+  // handle large sizes
+  let mult = 1;
+  if (aum.endsWith('bil')){
+    mult = 1000;
+    aum = aum.slice(0,3);
+  }
+  if(!isNaN(parseFloat(aum)) && isFinite(aum)) {
+    const value = parseFloat(aum) * mult;
+    Logger.log('processAUM = ' + value);
+    return value;
+  } else {
+    throw new Error("AUM is not available for this asset and source. Please try another data source");
+  }
+}
+
 function processDate(date) {
   return date;
 }

@@ -25,6 +25,9 @@ function getExpensesFromMorningstar(doc) {
 function getCategoryFromMorningstar(doc) {
   return doc('[vkey=MorningstarCategory]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
+
+function getAUMFromMorningstar(doc) {
+  return doc('[vkey=TotalAssetsCategory]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
 function loadFromMorningstar(option, id) {
@@ -44,4 +47,6 @@ function loadFromMorningstar(option, id) {
     return processCategory(getCategoryFromMorningstar(doc));
   if(option == "source")
     return processSource("morningstar");
+  if(option == "aum")
+    return processAUM(getAUMFromMorningstar(doc));
 }
