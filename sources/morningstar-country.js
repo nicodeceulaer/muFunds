@@ -72,49 +72,48 @@ function searchForMSID(id, country) {
   var cached = cache.get("mf-msid-" + id);
 
   if (cached != null && cached != -1) { 
+    Logger.log('msid: ' + cached + ' (cached)');
     return cached;
-  } else {
-    if (country == "au") {
-      try {
-        var url = getMorningstarCountryBase(country) + "/Ausearch/SecurityCodeAutoLookup?rows=20000&fq=SecurityTypeId:(1+OR+2+OR+3+OR+4+OR+5)&sort=UniverseSort+asc&q=" + id;
-        var fetch = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
-        var json = fetch.getContentText();
-        var data = JSON.parse(json);
-        var res = data["hits"]["hits"][0]["_source"]["Symbol"];
-        cache.put("mf-msid-" + id, res, 999999999);
-        return res;
-      }
-      catch(error) {
-        throw new Error("This asset is not compatible with this Morningstar country. Try another country or data source");
-      }
-    } else {
-      var fetch = UrlFetchApp.fetch(getMorningstarCountryBase(country) + getMorningstarCountrySearchLink(country) + id);
-      if(fetch.getResponseCode() == 200 && fetch.getContent().length > 0) {
-        var xmlstr = fetch.getContentText()
-                        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-                        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-                        .replace("xml:space", "space")
-                        .replace("xmlns:", "")
-                        .replace("ns0:", "")
-                        .replace(/<svg(.*)<\/svg>/gm, '');
-        var doc = Xml.parse(xmlstr, true);
-        var bodyHtml = doc.html.body;
-        if(country == "uk" || country == "gb") bodyHtml = bodyHtml[2];
-        bodyHtml = bodyHtml.toXmlString();
-        doc = XmlService.parse(bodyHtml).getRootElement();
-        var links = getElementsByClassName(doc, getMorningstarCountrySearchResultClass(country));
-        if(links.length > 0) {
-          var msid = getMSIDFromMorningstarSearch(doc, links, country);
-          cache.put("mf-msid-" + id, msid, 999999999);
-          return msid;
-        } else {
-          cache.put("mf-msid-" + id, -1, 999999999);
-          throw new Error("This asset is not compatible with this Morningstar country. Try another country or data source");
-        }
-      }
+  }
+  
+  if (country == "au") {
+    try {
+      throw new Error("I could not get Austria morningstar working. sorry :-(");
+
+      var url = getMorningstarCountryBase(country) + "/Ausearch/SecurityCodeAutoLookup?rows=20000&fq=SecurityTypeId:(1+OR+2+OR+3+OR+4+OR+5)&sort=UniverseSort+asc&q=" + id;
+      var fetch = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
+      var json = fetch.getContentText();
+      var data = JSON.parse(json);
+      var res = data["hits"]["hits"][0]["_source"]["Symbol"];
+      cache.put("mf-msid-" + id, res, 999999999);
+      return res;
+    }
+    catch(error) {
+      throw new Error("This asset is not compatible with this Morningstar country. Try another country or data source");
     }
   }
+  
+  let options = {muteHttpExceptions: true, validateHttpsCertificates: false};
+  var url = getMorningstarCountryBase(country) + getMorningstarCountrySearchLink(country) + id;
+  Logger.log('url: ' + url);
+  var fetch = UrlFetchApp.fetch(url, options);
+  Logger.log('code: ' + fetch.getResponseCode());
+  if(fetch.getResponseCode() == 200 && fetch.getContent().length > 0) {
+    var xmlstr = fetch.getContentText();
+    var doc = Cheerio.load(xmlstr);
+    const searchResultClass = getMorningstarCountrySearchResultClass(country);
+    Logger.log('searchResultClass: ' + searchResultClass);
+    const msid = getMSIDFromMorningstarSearch(doc, searchResultClass, country);
+    Logger.log('msid: ' + msid);
+    cache.put("mf-msid-" + id, msid, 999999999);
+    
+    if (msid == -1) {
+      throw new Error("This asset is not compatible with this Morningstar country. Try another country or data source");
+    }
+    return msid;
+  }
 }
+
 
 // Given an asset's identifier, returns related country
 function getMorningstarCountryFromAsset(id, country) {
@@ -138,80 +137,76 @@ function getMorningstarCountryFromAsset(id, country) {
     throw new Error("ISIN country is not compatible with Morningstar. Please try another compatible data source");
 }
 
-function getMSIDFromMorningstarSearch(doc, links, country) {
-  if(country == "au")
-    return getElementsByTagName(links[0], "a")[0].asElement().getAttribute("href").getValue().substr(18);
-  return getElementsByTagName(links[0], "a")[0].asElement().getAttribute("href").getValue().substr(-10);
+
+function getMSIDFromMorningstarSearch(doc, searchClass, country) {
+  const href = doc('.' + searchClass + ' a').attr('href');
+  Logger.log('href: ' + href);
+  if(href.length == 0) {
+    Logger.log(' not found');
+    return -1;
+  }  
+  
+  const msid = country == "au" ? href.substr(18) : href.substr(-10);
+  Logger.log('msid: ' + msid);
+  return msid;
 }
 
+
 function getNavFromMorningstarCountry(doc, country) {
-  if(country == "au") {
-    var row = getElementsByTagName(getElementsByTagName(doc, "table")[9], "td")[7].getValue();
-    return row.substr(row.indexOf('$')+1);
-  } else
-    return getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[0].getValue().substr(4).replace(',', '.');
+  return doc('.overviewKeyStatsTable .text').first().text().substr(4).replace(',', '.');
 }
 
 function getDateFromMorningstarCountry(doc, country) {
-  if(country == "au")
-    return getElementsByTagName(getElementsByTagName(doc, "table")[9], "td")[1].getValue().substr(6);
-  else
-    return getElementsByClassName(getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "heading")[0], "heading")[0].getValue();
+  return doc('.overviewKeyStatsTable .heading .heading').first().text();
 }
 
 function getChangeFromMorningstarCountry(doc, country) {
-  if(country == "au") {
-    var nav = getNavFromMorningstarCountry(doc, country);
-    var row = getElementsByTagName(getElementsByTagName(doc, "table")[9], "td")[8].getValue();
-    var change = row.substr(row.indexOf('$')+1);
-    if(!isNaN(parseFloat(nav)) && isFinite(nav) && !isNaN(parseFloat(change)) && isFinite(change) && nav > 0) {
-      change = parseFloat(change)/parseFloat(nav)*100;
-      return change.toString();
-    } else
-      throw new Error("Last change is not available for this asset and source. Please try another data source");
-  } else
-    return getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[1].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '').replace(',', '.');
+  const list= doc('.overviewKeyStatsTable .text').map(function() { return doc(this).text();}).get();
+  Logger.log('list of items:' + JSON.stringify(list));
+  return list[1].replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '').replace(',', '.');
 }
 
 function getCurrencyFromMorningstarCountry(doc, country) {
   if(country == "au") return "AUD";
-  return getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[0].getValue().substr(0, 3);
+  return doc('.overviewKeyStatsTable .text').first().text().substr(0,3);
 }
 
 function getExpensesFromMorningstarCountry(doc, country) {
-  if(country == "au")
-    return getElementsByTagName(getElementsByTagName(doc, "table")[11], "td")[12].getValue();
-  else if(country == "de")
-    return getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[9].getValue().replace(',', '.');
-  else if(country == "uk" || country == "gb") {
-    var rows = getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text");
-    return rows[rows.length-1].getValue().replace(',', '.');
-  } else if(country == "nl" || country == "dk" || country == "ch" || country == "it")
-    return getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[8].getValue().replace(',', '.');
+  const list= doc('.overviewKeyStatsTable .text').map(function() { return doc(this).text();}).get();
+  if(country == "de")
+    return list[9].replace(',', '.');
+  else if(country == "nl" || country == "uk" || country == "gb")
+    return list[list.length-1].replace(',', '.');
+  else if(country == "be")
+    return list[list.length-2].replace(',', '.');
+  else if(country == "dk" || country == "ch" || country == "it")
+    return list[8].replace(',', '.');
   else
-    return getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[7].getValue().replace(',', '.');
+    return list[7].replace(',', '.');
 }
 
-function getCategoryFromMorningstarCountry(doc, country) {
-  if(country == "au") {
-    var row = getElementsByTagName(getElementsByTagName(doc, "table")[9], "td")[5].getValue();
-    return row.slice(row.indexOf('Category')+9, -21);
-  } else if(country == "de")
-    return getElementsByTagName(getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[3], "a")[0].getValue();
-  else if(country == "dk")
-    return getElementsByTagName(getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[4], "a")[0].getValue();
+function getTotalAssetsFromMorningstarCountry(doc, country) {
+  const list= doc('.overviewKeyStatsTable .text').map(function() { return doc(this).text();}).get();
+  if(country == "de")
+    return list[list.length-4].replace(',', '.');
+  else if(country == "nl" || country == "uk" || country == "gb")
+    return list[list.length-3].replace(',', '.');
+  else if(country == "be")
+    return list[list.length-5].replace(',', '.');
+  else if(country == "dk" || country == "ch" || country == "it")
+    return list[8].replace(',', '.');
   else
-    return getElementsByTagName(getElementsByClassName(getElementsByClassName(doc, "overviewKeyStatsTable")[0], "text")[2], "a")[0].getValue();
+    return list[7].replace(',', '.');
+}
+
+
+function getCategoryFromMorningstarCountry(doc, country) {
+  return doc('.overviewKeyStatsTable .text a').first().text();
 }
 
 function fetchMorningstarCountry(id, country) {
   var url = getMorningstarCountryBase(country) + getMorningstarCountryLink(country) + id;
-  var doc;
-  if(country == "gb" || country == "uk")
-    doc = fetchURL(url, "morningstar-" + country + "-" + id, 2);
-  else
-    doc = fetchURL(url, "morningstar-" + country + "-" + id);
-  return doc;
+  return fetchURL(url, "morningstar-" + country + "-" + id);
 }
 
 function loadFromMorningstarCountry(option, id, country) {
