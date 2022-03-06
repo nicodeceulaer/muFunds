@@ -12,7 +12,14 @@
 
 function muFunds(option, id, source) {
   // First, check if option is valid
-  if(!(option == "nav" || option == "date" || option == "change" || option == "currency" || option == "expenses" || option == "category" || option == "source")) {
+  if(!( option == "nav" || 
+        option == "date" || 
+        option == "change" || 
+        option == "currency" || 
+        option == "expenses" || 
+        option == "category" || 
+        option == "assets" ||
+        option == "source")) {
     throw new Error( "You have selected an invalid option." );
     return;
   }
@@ -29,7 +36,24 @@ function muFunds(option, id, source) {
   if(source == "morningstar")
     return loadFromMorningstar(option, id);
 
-  if(source == "morningstar-au" || source == "morningstar-es" || source == "morningstar-de" || source == "morningstar-ie" || source == "morningstar-fr" || source == "morningstar-za" || source == "morningstar-at" || source == "morningstar-be" || source == "morningstar-dk" || source == "morningstar-fi" || source == "morningstar-gb" || source == "morningstar-uk" || source == "morningstar-ch" || source == "morningstar-is" || source == "morningstar-it" || source == "morningstar-pt" || source == "morningstar-no" || source == "morningstar-nl") {
+  if( source == "morningstar-au" || 
+      source == "morningstar-es" || 
+      source == "morningstar-de" || 
+      source == "morningstar-ie" || 
+      source == "morningstar-fr" || 
+      source == "morningstar-za" || 
+      source == "morningstar-at" || 
+      source == "morningstar-be" || 
+      source == "morningstar-dk" || 
+      source == "morningstar-fi" || 
+      source == "morningstar-gb" || 
+      source == "morningstar-uk" || 
+      source == "morningstar-ch" || 
+      source == "morningstar-is" || 
+      source == "morningstar-it" || 
+      source == "morningstar-pt" || 
+      source == "morningstar-no" || 
+      source == "morningstar-nl") {
     var country = source.substr(12, 2).toLowerCase();
     return loadFromMorningstarCountry(option, id, country);
   }
@@ -41,8 +65,6 @@ function muFunds(option, id, source) {
   throw new Error( "Source is not compatible. Please check the documentation for the compatibility list" );
   return;
 }
-
-/* ----------- Google Sheets add-on functions ----------- */
 
 // Adds "About µFunds" menu
 function onOpen(e) {
