@@ -1,70 +1,3 @@
-/* ----------- HTML Parsing functions ----------- */
-
-// Returns elements with a certain attribute
-function getElementsByAttribute(element, attribute, classToFind) {
-  var data = [];
-  var descendants = element.getDescendants();
-  descendants.push(element);
-  for(i in descendants) {
-    var elt = descendants[i].asElement();
-    if(elt != null) {
-      var classes = elt.getAttribute(attribute);
-      if(classes != null) {
-        classes = classes.getValue();
-        if(classes == classToFind) data.push(elt);
-        else {
-          classes = classes.split(' ');
-          for(j in classes) {
-            if(classes[j] == classToFind) {
-              data.push(elt);
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-  return data;
-}
-
-// Returns elements with a certain class
-function getElementsByClassName(element, classToFind) {
-  var data = [];
-  var descendants = element.getDescendants();
-  descendants.push(element);
-  for(i in descendants) {
-    var elt = descendants[i].asElement();
-    if(elt != null) {
-      var classes = elt.getAttribute('class');
-      if(classes != null) {
-        classes = classes.getValue();
-        if(classes == classToFind) data.push(elt);
-        else {
-          classes = classes.split(' ');
-          for(j in classes) {
-            if(classes[j] == classToFind) {
-              data.push(elt);
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-  return data;
-}
-
-// Returns elements with a certain tag name
-function getElementsByTagName(element, tagName) {
-  var data = [];
-  var descendants = element.getDescendants();
-  for(i in descendants) {
-    var elt = descendants[i].asElement();
-    if( elt !=null && elt.getName()== tagName) data.push(elt);
-  }
-  return data;
-}
-
 /* ----------- Data processing functions ----------- */
 function isISIN(id) {
   // ISIN have 12 characters
@@ -112,30 +45,33 @@ function processSource(source) {
   return source;
 }
 
+
 /* -------- Fetching cached/non-cached pages -------- */
-function fetchURL(url, cacheid, bodypos) {
-  if(bodypos == undefined) bodypos = 1;
+function fetchURL(url, cacheid) {
   var cache = CacheService.getScriptCache();
   var cached = cache.get(cacheid);
   if(cached != null) {
-    return XmlService.parse(cached).getRootElement();
+    return Cheerio.load(cached);
+  }
+
+  let options = { muteHttpExceptions: true,
+                  validateHttpsCertificates: false
+                  };
+  Logger.log('url: ' + url);
+  var fetch = UrlFetchApp.fetch(url, options);
+  Logger.log('code: ' + fetch.getResponseCode());
+  if(fetch.getResponseCode() == 200 && fetch.getContent().length > 0) {
+    var xmlstr = fetch.getContentText()
+                      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+                      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+                      .replace("xml:space", "space")
+                      .replace("xmlns:", "")
+                      .replace("ns0:", "")
+                      .replace(/<svg(.*)<\/svg>/gm, '');
+    var bodyHtml = xmlstr; // fixTags(xmlstr);
+    cache.put(cacheid, bodyHtml, 7200);
+    return Cheerio.load(bodyHtml);
   } else {
-    var fetch = UrlFetchApp.fetch(url);
-    if(fetch.getResponseCode() == 200 && fetch.getContent().length > 0) {
-      var xmlstr = fetch.getContentText()
-                        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-                        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-                        .replace("xml:space", "space")
-                        .replace("xmlns:", "")
-                        .replace("ns0:", "")
-                        .replace(/<svg(.*)<\/svg>/gm, '');
-      var doc = Xml.parse(xmlstr, true);
-      var body = doc.html.body;
-      var bodyHtml = (body.length > bodypos ? body[bodypos].toXmlString() : body.toXmlString());
-      cache.put(cacheid, bodyHtml, 7200);
-      return XmlService.parse(bodyHtml).getRootElement();
-    } else {
-      throw new Error("Wrong combination of asset identifier and source. Please check the accepted ones at the documentation");
-    }
+    throw new Error("Wrong combination of asset identifier and source. Please check the accepted ones at the documentation");
   }
 }
