@@ -216,14 +216,19 @@ function loadFromMorningstarCountry(option, id, country) {
 
   if(option == "nav")
     return processNav(getNavFromMorningstarCountry(doc, country));
+
   if(option == "date")
     return processDate(getDateFromMorningstarCountry(doc, country));
+
   if(option == "change")
     return processChange(getChangeFromMorningstarCountry(doc, country));
+
   if(option == "currency")
     return processCurrency(getCurrencyFromMorningstarCountry(doc, country));
+
   if(option == "expenses")
     return processExpenses(getExpensesFromMorningstarCountry(doc, country));
+
   if(option == "category")
     return processCategory(getCategoryFromMorningstarCountry(doc, country));
   if(option == "source")

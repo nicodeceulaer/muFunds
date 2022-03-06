@@ -9,6 +9,18 @@
  * @return The asked information from the fund, according to the selected source.
  * @customfunction
  */
+function test() {
+  // const options = ['nav', 'date', 'change', 'currency', 'expenses', 'category', 'source'];
+  const options = ['aum'];
+  const sources = ['morningstar-nl'];
+  for (const source of sources) {
+    for (const option of options) {
+      Logger.log('Test for option:' + option + ', source: ' + source);
+      let result = muFunds(option, "IE00B0MTTV84", source);
+      Logger.log('result: ' + result + ' (option=' + option + ', source=' + source + ')');
+    }
+  }
+}
 
 function muFunds(option, id, source) {
   // First, check if option is valid

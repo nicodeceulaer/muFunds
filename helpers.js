@@ -6,6 +6,7 @@ function isISIN(id) {
 }
 
 function processNav(nav) {
+  Logger.log('processNav: ' + nav);
   nav = nav.replace(',', '.');
   if(!isNaN(parseFloat(nav)) && isFinite(nav))
     return parseFloat(nav);
@@ -18,6 +19,7 @@ function processDate(date) {
 }
 
 function processChange(change) {
+  Logger.log('processChange: ' + change);
   change = change.replace(',', '.').replace('%', '');
   if(!isNaN(parseFloat(change)) && isFinite(change))
     return parseFloat(change)/100;
@@ -30,6 +32,7 @@ function processCurrency(currency) {
 }
 
 function processExpenses(expenses) {
+  Logger.log('processExpenses: ' + expenses);
   expenses = expenses.replace(',', '.').replace('%', '');
   if(!isNaN(parseFloat(expenses)) && isFinite(expenses))
     return parseFloat(expenses)/100;
