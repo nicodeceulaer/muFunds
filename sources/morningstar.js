@@ -1,29 +1,30 @@
 function fetchMorningstar(id) {
-  return fetchURL('http://quotes.morningstar.com/fund/c-header?t=' + id, "morningstar-" + id);
+  return fetchURL('https://quotes.morningstar.com/fund/c-header?t=' + id, "morningstar-" + id);
 }
 
 function getNavFromMorningstar(doc) {
-  return getElementsByAttribute(doc, 'vkey', "NAV")[0].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+  return doc('[vkey=NAV]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
 function getDateFromMorningstar(doc) {
-  return getElementsByAttribute(doc, 'vkey', "LastDate")[0].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+  return doc('[vkey=LastDate]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
 function getChangeFromMorningstar(doc) {
-  return getElementsByAttribute(doc, 'vkey', "DayChange")[0].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+  return doc('[vkey=DayChange]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
 function getCurrencyFromMorningstar(doc) {
-  return getElementsByAttribute(doc, 'vkey', "PriceCurrency")[0].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+  return doc('[vkey=PriceCurrency]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
 function getExpensesFromMorningstar(doc) {
-  return getElementsByAttribute(doc, 'vkey', "ExpenseRatio")[0].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+  return doc('[vkey=ExpenseRatio]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
 function getCategoryFromMorningstar(doc) {
-  return getElementsByAttribute(doc, 'vkey', "MorningstarCategory")[0].getValue().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+  return doc('[vkey=MorningstarCategory]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
+}
 }
 
 function loadFromMorningstar(option, id) {
