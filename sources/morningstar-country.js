@@ -1,43 +1,6 @@
 // Given a 2-letter country code, returns the base URL for a Morningstar website
 function getMorningstarCountryBase(country) {
-  if(country == "au")
-    return "https://www.morningstar.com.au";
-  if(country == "es")
-    return "http://www.morningstar.es/es";
-  if(country == "de")
-    return "http://www.morningstar.de/de";
-  if(country == "ie")
-    return "http://www.morningstarfunds.ie/ie";
-  if(country == "fr")
-    return "http://www.morningstar.fr/fr";
-  if(country == "za")
-    return "http://www.morningstar.co.za/za";
-  if(country == "at")
-    return "http://www.morningstar.at/at";
-  if(country == "be")
-    return "http://www.morningstar.be/be";
-  if(country == "dk")
-    return "http://www.morningstar.dk/dk";
-  if(country == "fi")
-    return "http://www.morningstar.fi/fi";
-  if(country == "gb" || country == "uk")
-    return "http://www.morningstar.co.uk/uk";
-  if(country == "ch")
-    return "http://www.morningstar.ch/ch";
-  if(country == "is")
-    return "http://www.morningstar.is/is";
-  if(country == "it")
-    return "http://www.morningstar.it/it";
-  if(country == "pt")
-    return "http://www.morningstar.pt/pt";
-  if(country == "no")
-    return "http://www.morningstar.no/no";
-  if(country == "nl")
-    return "http://www.morningstar.nl/nl";
-  // As a previous filter has been done, if a user arrives here it is because
-  // it comes from failed generic Morningstar and asset country has been searched
-  else
-    throw new Error("This option is not available for the given asset");
+  return countryLookup(country, 'url');
 }
 
 // Given a 2-letter country code, returns the location for funds snapshots
@@ -175,7 +138,9 @@ function getByLabelFromMorningstarCountry(doc, labels) {
 }
 
 function getNavFromMorningstarCountry(doc, country) {
-  return doc('.overviewKeyStatsTable .text').first().text().substr(4).replace(',', '.');
+  const label = countryLookup(country, 'nav');
+  const value = getByLabelFromMorningstarCountry(doc, label);
+  return value.substr(4).replace(',', '.');
 }
 
 function getDateFromMorningstarCountry(doc, country) {
@@ -194,17 +159,12 @@ function getCurrencyFromMorningstarCountry(doc, country) {
 }
 
 function getExpensesFromMorningstarCountry(doc, country) {
-  const list= doc('.overviewKeyStatsTable .text').map(function() { return doc(this).text();}).get();
-  if(country == "de")
-    return list[9].replace(',', '.');
-  else if(country == "nl" || country == "uk" || country == "gb")
-    return list[list.length-1].replace(',', '.');
-  else if(country == "be")
-    return list[list.length-2].replace(',', '.');
-  else if(country == "dk" || country == "ch" || country == "it")
-    return list[8].replace(',', '.');
-  else
-    return list[7].replace(',', '.');
+  const label = countryLookup(country, 'expenses');
+  const value = getByLabelFromMorningstarCountry(doc, label);
+  if( value == '-%' ) {
+    return "0";
+  }
+  return value.replace(',', '.');
 }
 
 function getAUMFromMorningstarCountry(doc, country) {
@@ -223,7 +183,9 @@ function getAUMFromMorningstarCountry(doc, country) {
 
 
 function getCategoryFromMorningstarCountry(doc, country) {
-  return doc('.overviewKeyStatsTable .text a').first().text();
+  const label = countryLookup(country, 'category');
+  const value = getByLabelFromMorningstarCountry(doc, label);
+  return value;
 }
 
 function fetchMorningstarCountry(id, country) {
