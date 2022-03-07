@@ -24,12 +24,12 @@ function test() {
 
 function muFunds(option, id, source) {
   // First, check if option is valid
-  if(!( option == "nav" || 
-        option == "date" || 
-        option == "change" || 
-        option == "currency" || 
-        option == "expenses" || 
-        option == "category" || 
+  if(!( option == "nav" ||
+        option == "date" ||
+        option == "change" ||
+        option == "currency" ||
+        option == "expenses" ||
+        option == "category" ||
         option == "aum" ||
         option == "source")) {
     throw new Error( "You have selected an invalid option." );
