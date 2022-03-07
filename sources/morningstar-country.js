@@ -151,6 +151,28 @@ function getMSIDFromMorningstarSearch(doc, searchClass, country) {
   return msid;
 }
 
+function getByLabelFromMorningstarCountry(doc, labels) {
+  // Logger.log('getByLabel ' + JSON.stringify(labels));
+  // ensure label is an array of strings to search for
+  if( typeof(labels) == 'string'){
+    labels = [labels];
+  }
+
+  for (elem of doc('.overviewKeyStatsTable tr')) {
+    const found_label = doc(elem).find('.heading').text();
+    // Logger.log(' label: ' + found_label + ' (' + typeof(found_label) + ')');
+    if(found_label) {
+      for (label of labels) {
+        if (found_label.includes(label)) {
+          const value = doc(elem).find('.text').text();
+          // Logger.log(' MATCH. value:' + value);
+          return value;
+        }
+      }
+    }
+  }
+  throw new Error("Label '" + label + "' was not found");
+}
 
 function getNavFromMorningstarCountry(doc, country) {
   return doc('.overviewKeyStatsTable .text').first().text().substr(4).replace(',', '.');
