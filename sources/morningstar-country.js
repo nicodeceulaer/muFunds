@@ -37,7 +37,6 @@ function searchForMSID(id, country) {
   // Checks if there is a cached version
   var cache = CacheService.getScriptCache();
   var cached = cache.get("mf-msid-" + id);
-
   if (cached != null && cached != -1) { 
     Logger.log('msid: ' + cached + ' (cached)');
     return cached;
@@ -104,11 +103,10 @@ function getMorningstarCountryFromAsset(id, country) {
     throw new Error("ISIN country is not compatible with Morningstar. Please try another compatible data source");
 }
 
-
 function getMSIDFromMorningstarSearch(doc, searchClass, country) {
   const href = doc('.' + searchClass + ' a').attr('href');
   Logger.log('href: ' + href);
-  if(href.length == 0) {
+  if(!href || href.length == 0) {
     Logger.log(' not found');
     return -1;
   }  
@@ -172,19 +170,10 @@ function getExpensesFromMorningstarCountry(doc, country) {
 }
 
 function getAUMFromMorningstarCountry(doc, country) {
-  const list= doc('.overviewKeyStatsTable .text').map(function() { return doc(this).text();}).get();
-  if(country == "de")
-    return list[list.length-4].replace(',', '.');
-  else if(country == "nl" || country == "uk" || country == "gb")
-    return list[list.length-3].replace(',', '.');
-  else if(country == "be")
-    return list[list.length-5].replace(',', '.');
-  else if(country == "dk" || country == "ch" || country == "it")
-    return list[8].replace(',', '.');
-  else
-    return list[7].replace(',', '.');
+  const label = countryLookup(country, 'aum');
+  const value = getByLabelFromMorningstarCountry(doc, label);
+  return value.replace(',', '.');
 }
-
 
 function getCategoryFromMorningstarCountry(doc, country) {
   const label = countryLookup(country, 'category');
