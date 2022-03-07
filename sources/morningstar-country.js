@@ -6,8 +6,12 @@ function getMorningstarCountryBase(country) {
 // Given a 2-letter country code, returns the location for funds snapshots
 function getMorningstarCountryLink(country) {
   if(country == "au")
-    return "/Funds/FundReportPrint/";
-  return "/funds/snapshot/snapshot.aspx?id=";
+    return "/Funds/FundReportPrint/{}";
+  if(country == 'be')
+    // Belgian morningstar site toggles randomly between Dutch and French version
+    return "/funds/snapshot/snapshot.aspx?id={0}&lang=nl-BE";
+  else
+    return "/funds/snapshot/snapshot.aspx?id={0}";
 }
 
 function getMorningstarCountrySearchLink(country) {
@@ -189,7 +193,7 @@ function getCategoryFromMorningstarCountry(doc, country) {
 }
 
 function fetchMorningstarCountry(id, country) {
-  var url = getMorningstarCountryBase(country) + getMorningstarCountryLink(country) + id;
+  var url = getMorningstarCountryBase(country) + getMorningstarCountryLink(country).format(id);
   return fetchURL(url, "morningstar-" + country + "-" + id);
 }
 
