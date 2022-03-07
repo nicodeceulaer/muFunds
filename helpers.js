@@ -17,6 +17,10 @@ function processNav(nav) {
 // returns AUM in milion
 function processAUM(aum) {
   Logger.log('processAUM: ' + aum);
+  if (aum == '-'){
+    // sometimes Morningstar does not show the AUM of a fund
+    return 0;
+  }
   aum = aum.replace(',', '.').replace('EUR','').replace('USD','');
   // handle large sizes
   let mult = 1;
