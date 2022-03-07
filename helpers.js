@@ -77,6 +77,7 @@ function fetchURL(url, cacheid) {
   var cache = CacheService.getScriptCache();
   var cached = cache.get(cacheid);
   if(cached != null) {
+    Logger.log('fetchURL(' + url + ') CACHED');
     return Cheerio.load(cached);
   }
 
@@ -97,6 +98,8 @@ function fetchURL(url, cacheid) {
     var bodyHtml = xmlstr; // fixTags(xmlstr);
     cache.put(cacheid, bodyHtml, 7200);
     return Cheerio.load(bodyHtml);
+  } else if (fetch.getResponseCode() == 404) {
+    throw new Error("Not found in this country");
   } else {
     throw new Error("Wrong combination of asset identifier and source. Please check the accepted ones at the documentation");
   }
