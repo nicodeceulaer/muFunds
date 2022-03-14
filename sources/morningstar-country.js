@@ -10,7 +10,7 @@ function getMorningstarCountryLink(country) {
   if(country == 'be')
     // Belgian morningstar site toggles randomly between Dutch and French version
     return "/funds/snapshot/snapshot.aspx?id={0}&lang=nl-BE";
-  else
+  else 
     return "/funds/snapshot/snapshot.aspx?id={0}";
 }
 
@@ -136,7 +136,7 @@ function getByLabelFromMorningstarCountry(doc, labels) {
       }
     }
   }
-  throw new Error("Label '" + label + "' was not found");
+  throw new Error("Labels '" + labels + "' not found");
 }
 
 function getNavFromMorningstarCountry(doc, country) {
