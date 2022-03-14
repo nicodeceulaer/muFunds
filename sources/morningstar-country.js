@@ -117,20 +117,24 @@ function getMSIDFromMorningstarSearch(doc, searchClass, country) {
 }
 
 function getByLabelFromMorningstarCountry(doc, labels) {
-  // Logger.log('getByLabel ' + JSON.stringify(labels));
+    return getDetailed(doc, labels, '#overviewQuickstatsDiv .overviewKeyStatsTable tr', '.heading', '.text');
+}
+
+function getDetailed(doc, labels, tableNeedle, labelNeedle, valueNeedle) {
+  Logger.log('getDetailed( labels:' + JSON.stringify(labels) + ', needles: ' + tableNeedle + ', ' + labelNeedle + ',' + valueNeedle +')');
   // ensure label is an array of strings to search for
   if( typeof(labels) == 'string'){
     labels = [labels];
   }
 
-  for (elem of doc('.overviewKeyStatsTable tr')) {
-    const found_label = doc(elem).find('.heading').text();
-    // Logger.log(' label: ' + found_label + ' (' + typeof(found_label) + ')');
+  for (elem of doc(tableNeedle)) {
+    const found_label = doc(elem).find(labelNeedle).text();
+    Logger.log(' label: ' + found_label + ' (' + typeof(found_label) + ')');
     if(found_label) {
       for (label of labels) {
         if (found_label.includes(label)) {
-          const value = doc(elem).find('.text').text();
-          // Logger.log(' MATCH. value:' + value);
+          const value = doc(elem).find(valueNeedle).text();
+          Logger.log(' MATCH. value:' + value);
           return value;
         }
       }
