@@ -6,12 +6,14 @@ function test() {
   // test_single('morningstar-de', 'US46137V5892');
   // test_single('morningstar-nl', 'LU0255977372');
   // test_single('morningstar-de', 'LU1171478784');
-  test_single('morningstar-de', 'LU0690375422');
+  // test_single('morningstar-de', 'LU0690375422');
+  // test_single('morningstar-de', 'US02072L6074');
+  test_single('morningstar-de', 'IE00BK5BC891');
 }
 
 function test_single(source, id) {
   // const options = ['nav', 'date', 'change', 'currency', 'expenses', 'category', 'source', 'aum'];
-  const options = ['nav'];
+  const options = ['expenses', 'div-yield'];
   
   for (const option of options) {
     Logger.log('Test(id:' + id + ', option:' + option + ', source: ' + source+ ')');
@@ -38,7 +40,8 @@ function muFunds(option, id, source) {
         option == "expenses" ||
         option == "category" ||
         option == "aum" ||
-        option == "source")) {
+        option == "source" ||
+        option == "div-yield")) {
     throw new Error( "You have selected an invalid option." );
     return;
   }

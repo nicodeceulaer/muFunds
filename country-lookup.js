@@ -14,7 +14,8 @@ function countryLookup( country, option) {
       'change': 'Änderung z. Vortag',
       'currency': ['Schlusskurs', 'NAV'],
       'expenses': 'Laufende Kosten',
-      'category': 'Morningstar Kategorie'
+      'category': 'Morningstar Kategorie',
+      'div-yield': '12-Monats-Dividendenrendite'
     },
     "ie": {
       'url': "http://www.morningstarfunds.ie/ie",
@@ -36,7 +37,8 @@ function countryLookup( country, option) {
       'change': 'Rendement 1 Dag',
       'currency': ['slotkoers', 'Koers'],
       'expenses': 'Lopende Kosten Factor',
-      'category': 'Morningstar Categorie'
+      'category': 'Morningstar Categorie',
+      'div-yield': 'Dividendrendement'
     },
     "dk": {
       'url': "http://www.morningstar.dk/dk",
@@ -80,7 +82,8 @@ function countryLookup( country, option) {
       'change': 'Rendement 1 Dag',
       'currency': ['slotkoers', 'Koers'],
       'expenses': 'Lopende Kosten Factor',
-      'category': 'Morningstar Categorie'
+      'category': 'Morningstar Categorie',
+      'div-yield': 'Dividendrendement'
     }
   };
 

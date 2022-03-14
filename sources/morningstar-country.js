@@ -179,6 +179,13 @@ function getAUMFromMorningstarCountry(doc, country) {
   return value.replace(',', '.');
 }
 
+function getDivYieldFromMorningstarCountry(doc, country) {
+  const label = countryLookup(country, 'div-yield');
+  const value = getDetailed(doc, label, '#TrailingReturnsOverview .overviewKeyStatsTable tr', '.label', '.value.number');
+  return value.replace(',', '.');
+}
+
+
 function getCategoryFromMorningstarCountry(doc, country) {
   const label = countryLookup(country, 'category');
   const value = getByLabelFromMorningstarCountry(doc, label);
@@ -218,4 +225,7 @@ function loadFromMorningstarCountry(option, id, country) {
 
   if(option == "source")
     return processSource("morningstar-" + country);
+
+  if(option == "div-yield")
+    return processDivYield(getDivYieldFromMorningstarCountry(doc, country));
 }

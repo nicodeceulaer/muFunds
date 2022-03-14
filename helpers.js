@@ -37,6 +37,19 @@ function processAUM(aum) {
   }
 }
 
+function processDivYield(value) {
+  Logger.log('processDivYield: ' + value);
+  if (value == '-') {
+    // sometimes Morningstar does not show the dividend yield
+    return 0;
+  }
+  value = value.replace(',', '.').replace('%', '');
+  if(!isNaN(parseFloat(value)) && isFinite(value))
+    return parseFloat(value)/100;
+  else
+    throw new Error("Div yield is not available for this asset and source. Please try another data source");
+}
+
 function processDate(date) {
   return date;
 }

@@ -30,6 +30,10 @@ function getAUMFromMorningstar(doc) {
   return doc('[vkey=TotalAssetsCategory]').text().replace(/\s(\s+)/g, '').replace(/\n/g, '').replace(/\t/g, '');
 }
 
+function getDivYieldFromMorningstar(doc) {
+  throw new Error("not supported");
+}
+
 function loadFromMorningstar(option, id) {
   var doc = fetchMorningstar(id);
 
@@ -49,4 +53,7 @@ function loadFromMorningstar(option, id) {
     return processSource("morningstar");
   if(option == "aum")
     return processAUM(getAUMFromMorningstar(doc));
+  if(option == "div-yield")
+    return processDivYield(getDivYieldFromMorningstar(doc));
+
 }
